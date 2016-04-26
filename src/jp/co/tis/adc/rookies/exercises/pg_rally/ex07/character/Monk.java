@@ -1,11 +1,16 @@
 package jp.co.tis.adc.rookies.exercises.pg_rally.ex07.character;
 
-import java.util.Collections;
 import java.util.List;
+
+import jp.co.tis.adc.rookies.exercises.pg_rally.ex07.strategy.Strategy;
 
 /**
  * 僧侶のクラス。<br>
- * 行動パターン：{@link CommandConstants#ATTACK}、{@link CommandConstants#GUARD}、{@link CommandConstants#RECOVERY}、{@link CommandConstants#RESUSCITATION}
+ * 行動パターン：
+ * {@link CommandConstants#ATTACK}、
+ * {@link CommandConstants#GUARD}、
+ * {@link CommandConstants#RECOVERY}、
+ * {@link CommandConstants#RESUSCITATION}
  *
  * @author Daisuke Nishioka
  * @since 1.0
@@ -34,24 +39,27 @@ public final class Monk extends GameCharacterFormBase {
 
     @Override
     public final void action(List<GameCharacterFormBase> allys, List<GameCharacterFormBase> enemies) {
-        String command = getCommand(allys, enemies);
+        String command = getCommand(this, allys, enemies);
         System.out.println(new StringBuilder(this.getName()).append("の").append(command).append("!"));
         switch (command) {
 
         case CommandConstants.ATTACK:
-            Collections.shuffle(enemies);
-            attack(enemies.get(0));
+            setLastAction(CommandConstants.ATTACK);
+            singleAttack(enemies);
             break;
 
         case CommandConstants.GUARD:
+            setLastAction(CommandConstants.GUARD);
             guard();
             break;
 
         case CommandConstants.RECOVERY:
+            setLastAction(CommandConstants.RECOVERY);
             recovery(allys);
             break;
 
         case CommandConstants.RESUSCITATION:
+            setLastAction(CommandConstants.RESUSCITATION);
             resuscitation(allys);
             break;
 
@@ -71,7 +79,7 @@ public final class Monk extends GameCharacterFormBase {
                 continue;
             }
             ally.damage(-100);
-            System.out.println(new StringBuilder(ally.getName()).append("の体力が回復した。"));
+            System.out.println(new StringBuilder(ally.getName()).append("の体力が全回復した。"));
         }
     }
 

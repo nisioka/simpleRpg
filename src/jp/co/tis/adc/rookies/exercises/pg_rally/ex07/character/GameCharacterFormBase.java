@@ -1,7 +1,10 @@
 package jp.co.tis.adc.rookies.exercises.pg_rally.ex07.character;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import jp.co.tis.adc.rookies.exercises.pg_rally.ex07.strategy.Strategy;
 
 /**
  * ゲームキャラクターのクラス。
@@ -20,7 +23,7 @@ public abstract class GameCharacterFormBase implements Cloneable{
     private int diffense;
     private double diffenseMagnification = 1.0;
     private Strategy strategy;
-    private String lastMessage;
+    private String lastAction;
 
     /**
      * コンストラクタ。HPを設定する。
@@ -57,6 +60,15 @@ public abstract class GameCharacterFormBase implements Cloneable{
         }
     };
 
+    @Override
+    public GameCharacterFormBase clone() {
+        try {
+            return (GameCharacterFormBase) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
     /**
      * 行動する。<br>
      * 行動パターンは{@link Strategy}によって決定される。
@@ -85,7 +97,23 @@ public abstract class GameCharacterFormBase implements Cloneable{
     }
 
     /**
-     * 防御する。
+     * 敵チームの誰か1体に攻撃。死んでいるキャラクターには攻撃しない。
+     *
+     * @param enemies 敵
+     */
+    void singleAttack(List<GameCharacterFormBase> enemies) {
+        Collections.shuffle(enemies);
+        for (GameCharacterFormBase enemy : enemies) {
+            if (enemy.getHitPoint() == 0) {
+                continue;
+            }
+            attack(enemy);
+            return;
+        }
+    }
+
+    /**
+     * 防御する。1ターンの間防御力が2倍になる。
      */
     void guard() {
         this.setDiffenseMagnification(2);
@@ -95,12 +123,14 @@ public abstract class GameCharacterFormBase implements Cloneable{
     /**
      * {@link Strategy}から得られたコマンドを取得する。
      *
+     * @param thisCharacter 自身
      * @param allys 味方キャラクター
      * @param enemies 敵キャラクター
      * @return コマンド
      */
-    final String getCommand(List<GameCharacterFormBase> allys, List<GameCharacterFormBase> enemies) {
-        return strategy.choiceAction(cloneCharacters(allys), cloneCharacters(enemies));
+    final String getCommand(GameCharacterFormBase thisCharacter,
+            List<GameCharacterFormBase> allys, List<GameCharacterFormBase> enemies) {
+        return strategy.choiceAction(thisCharacter, cloneCharacters(allys), cloneCharacters(enemies));
     }
 
     /**
@@ -117,35 +147,19 @@ public abstract class GameCharacterFormBase implements Cloneable{
         return copyList;
     }
 
+
     /**
-     * @return name
+     * 名前をゲットする。
+     *
+     * @return name 名前
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return hitPoint
-     */
-    public int getHitPoint() {
-        return hitPoint;
-    }
-
-    /**
-     * @return attack
-     */
-    public int getAttack() {
-        return attack;
-    }
-
-    /**
-     * @return diffense
-     */
-    public int getDiffense() {
-        return diffense;
-    }
-
-    /**
+     * 名前をセットする。
+     *
      * @param name セットする name
      */
     void setName(String name) {
@@ -153,64 +167,72 @@ public abstract class GameCharacterFormBase implements Cloneable{
     }
 
     /**
+     * 職業名をゲットする。
      *
-     * @return jobName
+     * @return jobName 職業名
      */
     public String getJobName() {
         return jobName;
     }
 
     /**
+     * 職業名をセットする。
      *
      * @param jobName セットする jobName
      */
-    public void setJobName(String jobName) {
+    void setJobName(String jobName) {
         this.jobName = jobName;
     }
 
     /**
+     * ヒットポイントをゲットする。
+     *
+     * @return hitPoint ヒットポイント
+     */
+    public int getHitPoint() {
+        return hitPoint;
+    }
+
+    /**
+     * 最大ヒットポイントをゲットする。
+     *
+     * @return maxHitPoint 最大ヒットポイント
+     */
+    public int getMaxHitPoint() {
+        return maxHitPoint;
+    }
+
+    /**
+     * 攻撃力をゲットする。
+     *
+     * @return attack 攻撃力
+     */
+    public int getAttack() {
+        return attack;
+    }
+
+    /**
+     * 攻撃力をセットする。
+     *
      * @param attack セットする attack
      */
     void setAttack(int attack) {
         this.attack = attack;
     }
 
-    /**
-     * @param diffense セットする diffense
-     */
-    void setDiffense(int diffense) {
-        this.diffense = diffense;
-    }
 
     /**
-     * @param strategy セットする strategy
-     */
-    void setStrategy(Strategy strategy) {
-        this.strategy = strategy;
-    }
-
-    /**
-     * @return lastMessage
-     */
-    public String getLastMessage() {
-        return lastMessage;
-    }
-
-    /**
-     * @param lastMessage セットする lastMessage
-     */
-    public void setLastMessage(String lastMessage) {
-        this.lastMessage = lastMessage;
-    }
-
-    /**
-     * @return attackMagnification
+     * 攻撃倍率をゲットする。
+     *
+     * @return attackMagnification 攻撃倍率
      */
     public double getAttackMagnification() {
         return attackMagnification;
     }
 
     /**
+     * 攻撃倍率をセットする。
+     *
      * @param attackMagnification セットする attackMagnification
      */
     public void setAttackMagnification(double attackMagnification) {
@@ -218,13 +240,35 @@ public abstract class GameCharacterFormBase implements Cloneable{
     }
 
     /**
-     * @return diffenseMagnification
+     * 防御力をゲットする。
+     *
+     * @return diffense 防御力
+     */
+    public int getDiffense() {
+        return diffense;
+    }
+
+    /**
+     * 防御力をセットする。
+     *
+     * @param diffense セットする diffense
+     */
+    void setDiffense(int diffense) {
+        this.diffense = diffense;
+    }
+
+    /**
+     * 防御倍率をゲットする。
+     *
+     * @return diffenseMagnification 防御倍率
      */
     public double getDiffenseMagnification() {
         return diffenseMagnification;
     }
 
     /**
+     * 防御倍率をセットする。
+     *
      * @param diffenseMagnification セットする diffenseMagnification
      */
     public void setDiffenseMagnification(double diffenseMagnification) {
@@ -232,18 +276,30 @@ public abstract class GameCharacterFormBase implements Cloneable{
     }
 
     /**
-     * @return maxHitPoint
+     * 作戦をセットする。
+     *
+     * @param strategy セットする strategy
      */
-    int getMaxHitPoint() {
-        return maxHitPoint;
+    void setStrategy(Strategy strategy) {
+        this.strategy = strategy;
     }
 
-    @Override
-    public GameCharacterFormBase clone() {
-        try {
-            return (GameCharacterFormBase) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+    /**
+     * 最後に行ったアクションをゲットする。
+     *
+     * @return lastAction 最後に行ったアクション
+     */
+    public String getLastAction() {
+        return lastAction;
+    }
+
+    /**
+     * 最後に行ったアクションをセットする。
+     *
+     * @param lastAction セットする lastAction
+     */
+    void setLastAction(String lastAction) {
+        this.lastAction = lastAction;
     }
 }
+

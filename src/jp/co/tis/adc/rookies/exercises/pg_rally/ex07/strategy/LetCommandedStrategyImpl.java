@@ -1,9 +1,11 @@
-package jp.co.tis.adc.rookies.exercises.pg_rally.ex07.character;
+package jp.co.tis.adc.rookies.exercises.pg_rally.ex07.strategy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+
+import jp.co.tis.adc.rookies.exercises.pg_rally.ex07.character.GameCharacterFormBase;
 
 /**
  * 命令させろ。<br>
@@ -12,10 +14,11 @@ import java.util.List;
  * @author Daisuke Nishioka
  * @since 1.0
  */
-public class LetCommanded implements Strategy {
+public class LetCommandedStrategyImpl implements Strategy {
 
     @Override
-    public String choiceAction(List<GameCharacterFormBase> allys, List<GameCharacterFormBase> enemies) {
+    public String choiceAction(GameCharacterFormBase thisCharacter,
+            List<GameCharacterFormBase> allys, List<GameCharacterFormBase> enemies) {
         try {
             System.out.println("コマンドを入力して下さい。");
             return new BufferedReader(new InputStreamReader(System.in)).readLine();
